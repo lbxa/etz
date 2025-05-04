@@ -8,7 +8,7 @@ import {
   } from '@google/genai';
 import * as fs from 'node:fs';
 import * as path from 'path';
-import * as ffmpeg from 'fluent-ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
 import * as readline from 'readline-sync';
 
 // Function to get the next available file number
@@ -34,18 +34,25 @@ function getAudioDuration(filePath: string): Promise<number> {
   });
 }
 
-// Function to split audio into chunks
-async function splitAudioIntoChunks(filePath: string, chunkDurationSec: number): Promise<string[]> {
+// Function to split audio into up to maxChunks chunks
+async function splitAudioIntoChunks(
+  filePath: string, 
+  chunkDurationSec: number,
+  maxChunks?: number
+): Promise<string[]> {
   const outputDir = path.join(path.dirname(filePath), 'chunks');
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir);
   }
   
   const totalDuration = await getAudioDuration(filePath);
-  const totalChunks = Math.ceil(totalDuration / chunkDurationSec);
+  const totalPossibleChunks = Math.ceil(totalDuration / chunkDurationSec);
+  const chunksToCreate = maxChunks ? Math.min(maxChunks, totalPossibleChunks) : totalPossibleChunks;
   const outputFiles: string[] = [];
   
-  for (let i = 0; i < totalChunks; i++) {
+  console.log(`Creating ${chunksToCreate} chunks of ${chunkDurationSec/60} minutes each...`);
+  
+  for (let i = 0; i < chunksToCreate; i++) {
     const startTime = i * chunkDurationSec;
     const outputFile = path.join(outputDir, `chunk_${i + 1}.mp3`);
     outputFiles.push(outputFile);
@@ -59,6 +66,7 @@ async function splitAudioIntoChunks(filePath: string, chunkDurationSec: number):
         .on('error', (err) => reject(err))
         .run();
     });
+    console.log(`Created chunk ${i+1}/${chunksToCreate}`);
   }
   
   return outputFiles;
@@ -111,7 +119,7 @@ async function transcribeChunk(
     },
   };
   
-  const model = 'gemini-2.5-pro-preview-03-25';
+  const model = 'gemini-2.5-pro-exp-03-25';
   const contents = [
     {
       role: 'user',
@@ -146,8 +154,9 @@ async function transcribeChunk(
     const jsonResponse = JSON.parse(responseText);
     
     if (jsonResponse && jsonResponse.transcription_lines) {
+      // Remove line numbers from output
       const fileContent = jsonResponse.transcription_lines
-        .map((line: { line_number: any; text: any; }) => `${line.line_number}: ${line.text}`)
+        .map((line: { text: any; }) => line.text)
         .join('\n');
       
       // Append to a single output file with chunk header
@@ -172,29 +181,33 @@ async function main() {
   const audioFilePath = 'audio/1973 smuel matilda war.mp3';
   const chunkDurationSec = 300; // 5 minutes in seconds
   
-  // Split audio into 5-minute chunks
-  console.log("Analyzing and splitting audio file...");
-  const chunkFiles = await splitAudioIntoChunks(audioFilePath, chunkDurationSec);
-  console.log(`Audio split into ${chunkFiles.length} chunks of 5 minutes each.`);
+  // Calculate total possible chunks without creating them
+  console.log("Analyzing audio file...");
+  const totalDuration = await getAudioDuration(audioFilePath);
+  const totalPossibleChunks = Math.ceil(totalDuration / chunkDurationSec);
+  console.log(`Audio can be split into ${totalPossibleChunks} chunks of 5 minutes each.`);
   
-  // Ask user how many chunks to process
-  const totalChunks = chunkFiles.length;
-  console.log(`Total number of 5-minute chunks: ${totalChunks}`);
-  const numChunksToProcess = readline.question(`How many chunks would you like to transcribe? (1-${totalChunks}): `);
-  const chunksToProcess = Math.min(parseInt(numChunksToProcess), totalChunks);
+  // Ask user how many chunks to process BEFORE splitting
+  console.log(`Total possible 5-minute chunks: ${totalPossibleChunks}`);
+  const numChunksToProcess = readline.question(`How many chunks would you like to split and transcribe? (1-${totalPossibleChunks}): `);
+  const chunksToProcess = Math.min(parseInt(numChunksToProcess), totalPossibleChunks);
   
   if (isNaN(chunksToProcess) || chunksToProcess <= 0) {
     console.error("Invalid input. Please enter a positive number.");
     return;
   }
   
+  // Only split the number of chunks requested
+  console.log(`Splitting audio into ${chunksToProcess} chunks...`);
+  const chunkFiles = await splitAudioIntoChunks(audioFilePath, chunkDurationSec, chunksToProcess);
+  
   // Create a single output file for all chunks
   const outputFilePath = `translated_output_${getNextFileNumber()}.txt`;
   console.log(`Writing all transcriptions to ${outputFilePath}`);
   
   // Process chunks sequentially to ensure proper ordering
-  console.log(`Processing first ${chunksToProcess} chunks...`);
-  for (let i = 0; i < chunksToProcess; i++) {
+  console.log(`Processing ${chunksToProcess} chunks...`);
+  for (let i = 0; i < chunkFiles.length; i++) {
     await transcribeChunk(ai, chunkFiles[i]!, i + 1, outputFilePath);
   }
   
