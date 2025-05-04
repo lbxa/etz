@@ -5,6 +5,7 @@ export function App() {
     return (
         <div>
             <FileDrop />
+
         </div>
     )
 }

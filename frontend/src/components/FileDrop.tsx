@@ -11,6 +11,7 @@ export function FileDrop() {
   const [isDragging, setIsDragging] = useState(false);
   const [droppedFiles, setDroppedFiles] = useState<File[]>([]);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>('idle');
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const { uploadFiles } = useGoogle();
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
@@ -68,12 +69,20 @@ export function FileDrop() {
     console.log("Starting upload for:", droppedFiles);
 
     try {
-      const uploadedUrls = await uploadFiles(droppedFiles);
+      // const uploadedUrls = await uploadFiles(droppedFiles);
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      const uploadedUrls = ['https://storage.googleapis.com/arxiv-audio-store/lib/podcast.mp3'];
       console.log("Upload complete. Uploaded URLs:", uploadedUrls);
       setUploadStatus('success');
+      
+      // Set the first uploaded URL as our audio source
+      if (uploadedUrls && uploadedUrls.length > 0) {
+        setAudioUrl(uploadedUrls[0]);
+      }
     } catch (error) {
       console.error("Upload failed:", error);
       setUploadStatus('error');
+      setAudioUrl(null);
     }
   };
 
@@ -120,6 +129,22 @@ export function FileDrop() {
 
                  {uploadStatus === 'success' && <p className="text-green-600 mt-2">Upload successful!</p>}
                  {uploadStatus === 'error' && <p className="text-red-600 mt-2">Upload failed. Please try again.</p>}
+             </div>
+           )}
+           
+           {/* Audio Player */}
+           {uploadStatus === 'success' && audioUrl && (
+             <div className="w-full mt-6">
+               <h4 className="text-md font-medium mb-2">Your Podcast</h4>
+               <div className="bg-muted/30 p-4 rounded-md">
+                 <audio 
+                   controls 
+                   className="w-full" 
+                   src={audioUrl}
+                 >
+                   Your browser does not support the audio element.
+                 </audio>
+               </div>
              </div>
            )}
         </CardContent>
