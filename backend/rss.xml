@@ -4,9 +4,9 @@
      xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Voices from the Yom Kippur War</title>
-    <link>https://lbxa.github.io/etz/</link>
+    <link>https://lbxa.github.io/arxiv-to-mp3/</link>
     <itunes:category text="History" />
-    <itunes:image href="https://lbxa.github.io/etz/rss.xml/assets/cover.png"/>
+    <itunes:image href="https://lbxa.github.io/arxiv-to-mp3/rss.xml/assets/cover.png"/>
     <itunes:explicit>false</itunes:explicit>
     <itunes:owner>
       <itunes:name>Historical Archives</itunes:name>
@@ -19,16 +19,16 @@
     <description>A personal account of life during the Yom Kippur War through family audio recordings and historical context.</description>
     <language>en-us</language>
 
-    <atom:link href="https://lbxa.github.io/etz/rss.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="https://lbxa.github.io/arxiv-to-mp3/rss.xml" rel="self" type="application/rss+xml"/>
 
     <!-- Episode 1: Waiting in the Shadow -->
     <item>
       <title>1: Waiting in the Shadow</title>
       <description>Imagine waiting for the joyous news of your first grandchild, but the phone lines are silent, and the air outside hums with the tension of war. This is the reality facing one family in October 1973. This episode introduces the central family anxiously awaiting news of a birth amidst the backdrop of the Yom Kippur War. It establishes their deep worry, the sacrifices being made on the home front, and their fervent hopes for both family health and national victory.</description>
-      <link>https://example.com/yom-kippur-war-podcast/episodes/1</link>
-      <guid>https://example.com/yom-kippur-war-podcast/episodes/1</guid>
-      <enclosure url="https://example.com/yom-kippur-war-podcast/episodes/1.mp3" length="1800000" type="audio/mpeg"/>
-      <pubDate>Wed, 04 Oct 2023 09:00:00 GMT</pubDate>
+      <link>https://storage.googleapis.com/arxiv-audio-store/lib/podcast.mp3</link>
+      <guid>https://storage.googleapis.com/arxiv-audio-store/lib/podcast.mp3</guid>
+      <enclosure url="https://storage.googleapis.com/arxiv-audio-store/lib/podcast.mp3" length="1800000" type="audio/mpeg"/>
+      <pubDate>Wed, 04 May 2023 09:00:00 GMT</pubDate>
       <itunes:episodeType>full</itunes:episodeType>
     </item>
 
