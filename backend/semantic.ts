@@ -28,7 +28,7 @@ interface StoryboardData {
 async function extractSemanticInformation(transcriptPath: string): Promise<StoryboardData> {
   // Initialize Google Generative AI
   const apiKey = process.env.GOOGLE_API_KEY || "YOUR_API_KEY_HERE";
-  const genAI = new GoogleGenAI(apiKey);
+  const genAI = new GoogleGenAI('AIzaSyAH19FlHAJdQZoTwA37tPZ85bhScckDNJo');
 
   // Read transcript file
   const transcriptContent = fs.readFileSync(transcriptPath, 'utf8');
