@@ -1,6 +1,5 @@
 {
   "name": "etz",
-  "module": "index.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
@@ -8,5 +7,8 @@
   },
   "peerDependencies": {
     "typescript": "^5"
-  }
+  },
+  "workspaces": [
+    "frontend"
+  ]
 }
