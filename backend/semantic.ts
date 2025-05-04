@@ -1,136 +1,181 @@
 // To run this code you need to install the following dependencies:
-// bun add @google/genai
+// npm install @google/genai mime
+// npm install -D @types/node
 
 import { GoogleGenAI } from '@google/genai';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 interface KeyEvent {
-  id: number;
-  title: string;
-  description: string;
-  importance: number; // 1-10 scale
-  timestamp?: string; // Optional timestamp from transcript
+  id: string;
+  shortTitle: string;
+  summary: string;
+  date?: string;
+}
+
+interface Episode {
+  episodeNumber: number;
+  workingTitle: string;
+  hook: string;
+  orderedEventIds: string[];
+  episodeSynopsis: string;
 }
 
 interface EventConnection {
-  sourceEventId: number;
-  targetEventId: number;
-  relationship: string; // e.g., "causes", "follows", "contrasts with"
+  sourceEventId: string;
+  targetEventId: string;
+  relationshipType: string; // e.g., "causes", "follows", "contrasts", "parallels", "echoes"
   description: string;
 }
 
 interface StoryboardData {
-  keyEvents: KeyEvent[];
+  events: KeyEvent[];
+  episodes: Episode[];
   connections: EventConnection[];
 }
 
 async function extractSemanticInformation(transcriptPath: string): Promise<StoryboardData> {
   // Initialize Google Generative AI
-  const apiKey = process.env.GOOGLE_API_KEY || "YOUR_API_KEY_HERE";
-  const genAI = new GoogleGenAI('AIzaSyAH19FlHAJdQZoTwA37tPZ85bhScckDNJo');
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "";
+  if (!apiKey) {
+    throw new Error("API key not found in environment variables (GEMINI_API_KEY or GOOGLE_API_KEY)");
+  }
+  
+  const ai = new GoogleGenAI({
+    apiKey,
+  });
 
   // Read transcript file
-  const transcriptContent = fs.readFileSync(transcriptPath, 'utf8');
+  const transcript = fs.readFileSync(transcriptPath, 'utf8');
   
-  // Define the prompt for extracting key events
-  const podcastOutlinePrompt = `
-    You are a senior podcast story architect.
-
-    Goal
-    Turn raw story material into a complete multi‑episode outline that flows logically and keeps listeners engaged.
-
-    Input
-    1. Family‑history transcript (or list of rough key events)
-    2. Any metadata I pass in
-    ${keyEvents ? `\nExisting key events:\n${keyEvents.map(e => `ID ${e.id}: ${e.title} – ${e.description}`).join('\n')}\n` : ''}
-
-    Tasks
-    A. Event refinement
-      • Extract or polish the smallest set of pivotal events (7‑15 ideal).  
-      • For each event give: id, short title, one‑sentence summary, date (if known).
-
-    B. Episode planning
-      • Decide the optimal number of podcast episodes (3‑8 typical).  
-      • For each episode give: episodeNumber, workingTitle, hook, eventIdsInOrder, brief episodeSynopsis.
-
-    C. Narrative continuity
-      • Map how events link so that cause and effect are clear.  
-      • For every significant link provide: sourceEventId, targetEventId, relationshipType (causes, follows, contrasts, parallels, echoes), one‑line description.
-
-    Output
-    Return a single JSON object with three keys:
+  // Define the configuration and model
+  const config = {
+    responseMimeType: 'text/plain',
+  };
+  const model = 'gemini-2.5-pro-preview-03-25';
+  
+  // Create the prompt structure for podcast outline
+  const contents = [
     {
-      "events": [ {...} ],
-      "episodes": [ {...} ],
-      "connections": [ {...} ]
+      role: 'user',
+      parts: [
+        {
+          text: `You are a senior podcast story architect.
+
+Goal
+Turn the raw transcript of a family-history interview into a complete multi-episode podcast outline that flows logically and keeps listeners engaged.
+
+Input
+Full transcript:
+"""
+${transcript}
+"""
+
+Tasks
+
+A. Event Extraction
+    •   Identify the 7–15 pivotal events within the transcript that drive the narrative. Pivotal events often include major life milestones (births, deaths, migrations, marriages), significant challenges or triumphs, key decisions, turning points, moments revealing core character traits, or anecdotes central to the family's identity.
+    •   For each event provide:
+        *   \`id\`: A unique, sequential identifier (e.g., \`EV001\`, \`EV002\`).
+        *   \`shortTitle\`: A concise, evocative title (3-5 words).
+        *   \`summary\`: A single sentence summarizing the core of the event.
+        *   \`date\`: The date or time period of the event, if mentioned or clearly inferable (e.g., "1945", "Summer 1968", "childhood"). Use "unknown" if not specified.
+
+B. Episode Planning
+    •   Determine the optimal number of podcast episodes based on the density and flow of the extracted events (typically 3–8 episodes).
+    •   For each episode provide:
+        *   \`episodeNumber\`: Sequential integer (1, 2, 3...).
+        *   \`workingTitle\`: A compelling, draft title for the episode.
+        *   \`hook\`: A 1-2 sentence opening for the episode, designed to grab the listener's attention immediately (e.g., posing a question, presenting a dramatic moment, highlighting a core theme).
+        *   \`orderedEventIds\`: An array of \`id\`s from Task A, sequenced to create the narrative flow for *this* episode. The order should generally be chronological but can incorporate flashbacks if narratively effective.
+        *   \`episodeSynopsis\`: A brief (2-3 sentence) summary describing the episode's narrative arc, main focus, and how it contributes to the overall story.
+
+C. Narrative Continuity
+    •   Map the significant connections between the extracted events to clarify cause-and-effect relationships and thematic links. Focus on connections that build narrative momentum or reveal deeper meaning.
+    •   For every significant link identified, output:
+        *   \`sourceEventId\`: The \`id\` of the event that influences or precedes.
+        *   \`targetEventId\`: The \`id\` of the event that is influenced or follows.
+        *   \`relationshipType\`: The nature of the link (choose one: \`causes\`, \`follows\`, \`contrasts\`, \`parallels\`, \`echoes\`).
+            *   \`causes\`: Event A directly leads to Event B.
+            *   \`follows\`: Event B happens after Event A chronologically, often as a consequence or next step, but not strictly causal.
+            *   \`contrasts\`: Event A highlights a difference with Event B.
+            *   \`parallels\`: Event A shares a similar theme or pattern with Event B.
+            *   \`echoes\`: Event B subtly recalls or mirrors Event A later in the timeline.
+        *   \`description\`: A one-line explanation of the specific connection.
+
+Output
+Return a single JSON object adhering strictly to the following structure:
+
+{
+  "events": [
+    {
+      "id": "string",
+      "shortTitle": "string",
+      "summary": "string",
+      "date": "string"
+    }
+  ],
+  "episodes": [
+    {
+      "episodeNumber": integer,
+      "workingTitle": "string",
+      "hook": "string",
+      "orderedEventIds": ["string", ...],
+      "episodeSynopsis": "string"
+    }
+  ],
+  "connections": [
+    {
+      "sourceEventId": "string",
+      "targetEventId": "string",
+      "relationshipType": "string",
+      "description": "string"
+    }
+  ]
+}
+
+General Instructions:
+*   Focus on the clearest and most compelling narrative threads present in the transcript.
+*   Keep all generated text (titles, summaries, hooks, descriptions) concise and engaging.
+*   Avoid repetition in summaries and descriptions.
+*   Ensure the overall structure maintains chronological clarity where possible, using the event connections and episode order to build the story effectively over time.`,
+        },
+      ],
+    },
+  ];
+
+  // Generate the content
+  try {
+    const response = await ai.models.generateContentStream({
+      model,
+      config,
+      contents,
+    });
+
+    let resultText = '';
+    for await (const chunk of response) {
+      resultText += chunk.text || '';
     }
 
-    Keep prose tight, avoid repetition, and maintain chronological clarity.
-  `;
-
-  // Extract key events
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-  const keyEventsResponse = await model.generateContent(promptKeyEvents);
-  const keyEventsText = keyEventsResponse.response.text();
-  
-  // Parse the JSON response
-  let keyEvents: KeyEvent[] = [];
-  try {
-    // Extract JSON from the response (in case there's any wrapper text)
-    const jsonMatch = keyEventsText.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      keyEvents = JSON.parse(jsonMatch[0]);
-    } else {
-      throw new Error("Could not find JSON array in response");
+    // Parse the JSON from the response
+    try {
+      // Try to find a JSON object in the response
+      const jsonMatch = resultText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const storyboardData = JSON.parse(jsonMatch[0]) as StoryboardData;
+        return storyboardData;
+      } else {
+        throw new Error("Could not find JSON object in response");
+      }
+    } catch (error) {
+      console.error("Error parsing storyboard JSON:", error);
+      console.error("Raw response:", resultText);
+      throw new Error("Failed to parse response as JSON");
     }
   } catch (error) {
-    console.error("Error parsing key events JSON:", error);
-    console.error("Raw response:", keyEventsText);
-    return { keyEvents: [], connections: [] };
+    console.error("Error generating content:", error);
+    throw error;
   }
-  
-  // Define the prompt for extracting connections between events
-  const promptConnections = `
-  You are an expert story analyst and editor with deep knowledge of narrative structure.
-  
-  I've identified the following key events in the story:
-  
-  ${keyEvents.map(event => `ID ${event.id}: ${event.title} - ${event.description}`).join('\n')}
-  
-  Now, I need you to analyze how these events connect to each other to form a coherent narrative. For each meaningful connection between events, provide:
-  
-  1. The source event ID
-  2. The target event ID (the event that follows or is affected by the source event)
-  3. The type of relationship (e.g., "causes", "follows", "contrasts with", "parallels", "echoes")
-  4. A brief description of how they connect
-  
-  Focus on the most important connections that demonstrate continuity and causality in the story.
-  
-  Format your response as a JSON array of objects with the keys: sourceEventId, targetEventId, relationship, and description.
-  `;
-
-  // Extract connections
-  const connectionsResponse = await model.generateContent(promptConnections);
-  const connectionsText = connectionsResponse.response.text();
-  
-  // Parse the JSON response
-  let connections: EventConnection[] = [];
-  try {
-    // Extract JSON from the response (in case there's any wrapper text)
-    const jsonMatch = connectionsText.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      connections = JSON.parse(jsonMatch[0]);
-    } else {
-      throw new Error("Could not find JSON array in response");
-    }
-  } catch (error) {
-    console.error("Error parsing connections JSON:", error);
-    console.error("Raw response:", connectionsText);
-    return { keyEvents, connections: [] };
-  }
-  
-  return { keyEvents, connections };
 }
 
 async function generateStoryboard(transcriptPath: string, outputPath: string): Promise<void> {
@@ -161,23 +206,31 @@ async function generateStoryboard(transcriptPath: string, outputPath: string): P
 function generateReadableStoryboard(data: StoryboardData): string {
   let output = "# STORYBOARD\n\n";
   
-  output += "## KEY EVENTS\n\n";
-  for (const event of data.keyEvents) {
-    output += `### ${event.id}. ${event.title} (Importance: ${event.importance}/10)\n`;
-    output += `${event.description}\n`;
-    if (event.timestamp) {
-      output += `Timestamp: ${event.timestamp}\n`;
+  output += "## EVENTS\n\n";
+  for (const event of data.events) {
+    output += `### ${event.id}. ${event.shortTitle}\n`;
+    output += `${event.summary}\n`;
+    if (event.date) {
+      output += `Date: ${event.date}\n`;
     }
     output += "\n";
   }
   
+  output += "## EPISODES\n\n";
+  for (const episode of data.episodes) {
+    output += `### Episode ${episode.episodeNumber}: ${episode.workingTitle}\n`;
+    output += `Hook: ${episode.hook}\n\n`;
+    output += `Synopsis: ${episode.episodeSynopsis}\n\n`;
+    output += `Event IDs: ${episode.orderedEventIds.join(', ')}\n\n`;
+  }
+  
   output += "## CONNECTIONS & CONTINUITY\n\n";
   for (const connection of data.connections) {
-    const sourceEvent = data.keyEvents.find(e => e.id === connection.sourceEventId);
-    const targetEvent = data.keyEvents.find(e => e.id === connection.targetEventId);
+    const sourceEvent = data.events.find(e => e.id === connection.sourceEventId);
+    const targetEvent = data.events.find(e => e.id === connection.targetEventId);
     
     if (sourceEvent && targetEvent) {
-      output += `### ${sourceEvent.title} ${connection.relationship} ${targetEvent.title}\n`;
+      output += `### ${sourceEvent.shortTitle} ${connection.relationshipType} ${targetEvent.shortTitle}\n`;
       output += `${connection.description}\n\n`;
     }
   }
@@ -217,4 +270,4 @@ if (require.main === module) {
 
 // Export functions for use in other modules
 export { extractSemanticInformation, generateStoryboard };
-export type { StoryboardData, KeyEvent, EventConnection };
+export type { StoryboardData, KeyEvent, EventConnection, Episode };
