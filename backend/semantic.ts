@@ -35,14 +35,8 @@ interface StoryboardData {
 }
 
 async function extractSemanticInformation(transcriptPath: string): Promise<StoryboardData> {
-  // Initialize Google Generative AI
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || "";
-  if (!apiKey) {
-    throw new Error("API key not found in environment variables (GEMINI_API_KEY or GOOGLE_API_KEY)");
-  }
-  
   const ai = new GoogleGenAI({
-    apiKey,
+    apiKey: "AIzaSyDIKdES27Z1aIcXksJNjPZZ3ZIRkbbVbAU",
   });
 
   // Read transcript file
@@ -52,7 +46,7 @@ async function extractSemanticInformation(transcriptPath: string): Promise<Story
   const config = {
     responseMimeType: 'text/plain',
   };
-  const model = 'gemini-2.5-pro-preview-03-25';
+  const model = 'gemini-2.5-pro-exp-03-25';
   
   // Create the prompt structure for podcast outline
   const contents = [
@@ -62,84 +56,84 @@ async function extractSemanticInformation(transcriptPath: string): Promise<Story
         {
           text: `You are a senior podcast story architect.
 
-Goal
-Turn the raw transcript of a family-history interview into a complete multi-episode podcast outline that flows logically and keeps listeners engaged.
+            Goal
+            Turn the raw transcript of a family-history interview into a complete multi-episode podcast outline that flows logically and keeps listeners engaged.
 
-Input
-Full transcript:
-"""
-${transcript}
-"""
+            Input
+            Full transcript:
+            """
+            ${transcript}
+            """
 
-Tasks
+            Tasks
 
-A. Event Extraction
-    •   Identify the 7–15 pivotal events within the transcript that drive the narrative. Pivotal events often include major life milestones (births, deaths, migrations, marriages), significant challenges or triumphs, key decisions, turning points, moments revealing core character traits, or anecdotes central to the family's identity.
-    •   For each event provide:
-        *   \`id\`: A unique, sequential identifier (e.g., \`EV001\`, \`EV002\`).
-        *   \`shortTitle\`: A concise, evocative title (3-5 words).
-        *   \`summary\`: A single sentence summarizing the core of the event.
-        *   \`date\`: The date or time period of the event, if mentioned or clearly inferable (e.g., "1945", "Summer 1968", "childhood"). Use "unknown" if not specified.
+            A. Event Extraction
+                •   Identify the 7–15 pivotal events within the transcript that drive the narrative. Pivotal events often include major life milestones (births, deaths, migrations, marriages), significant challenges or triumphs, key decisions, turning points, moments revealing core character traits, or anecdotes central to the family's identity.
+                •   For each event provide:
+                    *   \`id\`: A unique, sequential identifier (e.g., \`EV001\`, \`EV002\`).
+                    *   \`shortTitle\`: A concise, evocative title (3-5 words).
+                    *   \`summary\`: A single sentence summarizing the core of the event.
+                    *   \`date\`: The date or time period of the event, if mentioned or clearly inferable (e.g., "1945", "Summer 1968", "childhood"). Use "unknown" if not specified.
 
-B. Episode Planning
-    •   Determine the optimal number of podcast episodes based on the density and flow of the extracted events (typically 3–8 episodes).
-    •   For each episode provide:
-        *   \`episodeNumber\`: Sequential integer (1, 2, 3...).
-        *   \`workingTitle\`: A compelling, draft title for the episode.
-        *   \`hook\`: A 1-2 sentence opening for the episode, designed to grab the listener's attention immediately (e.g., posing a question, presenting a dramatic moment, highlighting a core theme).
-        *   \`orderedEventIds\`: An array of \`id\`s from Task A, sequenced to create the narrative flow for *this* episode. The order should generally be chronological but can incorporate flashbacks if narratively effective.
-        *   \`episodeSynopsis\`: A brief (2-3 sentence) summary describing the episode's narrative arc, main focus, and how it contributes to the overall story.
+            B. Episode Planning
+                •   Determine the optimal number of podcast episodes based on the density and flow of the extracted events (typically 3–8 episodes).
+                •   For each episode provide:
+                    *   \`episodeNumber\`: Sequential integer (1, 2, 3...).
+                    *   \`workingTitle\`: A compelling, draft title for the episode.
+                    *   \`hook\`: A 1-2 sentence opening for the episode, designed to grab the listener's attention immediately (e.g., posing a question, presenting a dramatic moment, highlighting a core theme).
+                    *   \`orderedEventIds\`: An array of \`id\`s from Task A, sequenced to create the narrative flow for *this* episode. The order should generally be chronological but can incorporate flashbacks if narratively effective.
+                    *   \`episodeSynopsis\`: A brief (2-3 sentence) summary describing the episode's narrative arc, main focus, and how it contributes to the overall story.
 
-C. Narrative Continuity
-    •   Map the significant connections between the extracted events to clarify cause-and-effect relationships and thematic links. Focus on connections that build narrative momentum or reveal deeper meaning.
-    •   For every significant link identified, output:
-        *   \`sourceEventId\`: The \`id\` of the event that influences or precedes.
-        *   \`targetEventId\`: The \`id\` of the event that is influenced or follows.
-        *   \`relationshipType\`: The nature of the link (choose one: \`causes\`, \`follows\`, \`contrasts\`, \`parallels\`, \`echoes\`).
-            *   \`causes\`: Event A directly leads to Event B.
-            *   \`follows\`: Event B happens after Event A chronologically, often as a consequence or next step, but not strictly causal.
-            *   \`contrasts\`: Event A highlights a difference with Event B.
-            *   \`parallels\`: Event A shares a similar theme or pattern with Event B.
-            *   \`echoes\`: Event B subtly recalls or mirrors Event A later in the timeline.
-        *   \`description\`: A one-line explanation of the specific connection.
+            C. Narrative Continuity
+                •   Map the significant connections between the extracted events to clarify cause-and-effect relationships and thematic links. Focus on connections that build narrative momentum or reveal deeper meaning.
+                •   For every significant link identified, output:
+                    *   \`sourceEventId\`: The \`id\` of the event that influences or precedes.
+                    *   \`targetEventId\`: The \`id\` of the event that is influenced or follows.
+                    *   \`relationshipType\`: The nature of the link (choose one: \`causes\`, \`follows\`, \`contrasts\`, \`parallels\`, \`echoes\`).
+                        *   \`causes\`: Event A directly leads to Event B.
+                        *   \`follows\`: Event B happens after Event A chronologically, often as a consequence or next step, but not strictly causal.
+                        *   \`contrasts\`: Event A highlights a difference with Event B.
+                        *   \`parallels\`: Event A shares a similar theme or pattern with Event B.
+                        *   \`echoes\`: Event B subtly recalls or mirrors Event A later in the timeline.
+                    *   \`description\`: A one-line explanation of the specific connection.
 
-Output
-Return a single JSON object adhering strictly to the following structure:
+            Output
+            Return a single JSON object adhering strictly to the following structure:
 
-{
-  "events": [
-    {
-      "id": "string",
-      "shortTitle": "string",
-      "summary": "string",
-      "date": "string"
-    }
-  ],
-  "episodes": [
-    {
-      "episodeNumber": integer,
-      "workingTitle": "string",
-      "hook": "string",
-      "orderedEventIds": ["string", ...],
-      "episodeSynopsis": "string"
-    }
-  ],
-  "connections": [
-    {
-      "sourceEventId": "string",
-      "targetEventId": "string",
-      "relationshipType": "string",
-      "description": "string"
-    }
-  ]
-}
+            {
+              "events": [
+                {
+                  "id": "string",
+                  "shortTitle": "string",
+                  "summary": "string",
+                  "date": "string"
+                }
+              ],
+              "episodes": [
+                {
+                  "episodeNumber": integer,
+                  "workingTitle": "string",
+                  "hook": "string",
+                  "orderedEventIds": ["string", ...],
+                  "episodeSynopsis": "string"
+                }
+              ],
+              "connections": [
+                {
+                  "sourceEventId": "string",
+                  "targetEventId": "string",
+                  "relationshipType": "string",
+                  "description": "string"
+                }
+              ]
+            }
 
-General Instructions:
-*   Focus on the clearest and most compelling narrative threads present in the transcript.
-*   Keep all generated text (titles, summaries, hooks, descriptions) concise and engaging.
-*   Avoid repetition in summaries and descriptions.
-*   Ensure the overall structure maintains chronological clarity where possible, using the event connections and episode order to build the story effectively over time.`,
-        },
+            General Instructions:
+            *   Focus on the clearest and most compelling narrative threads present in the transcript.
+            *   Keep all generated text (titles, summaries, hooks, descriptions) concise and engaging.
+            *   Avoid repetition in summaries and descriptions.
+            *   Ensure the overall structure maintains chronological clarity where possible, using the event connections and episode order to build the story effectively over time.`,
+                    },
       ],
     },
   ];

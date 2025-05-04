@@ -1,0 +1,130 @@
+# STORYBOARD
+
+## EVENTS
+
+### EV001. Anxious Wait Amidst War
+Parents express profound anxiety and sleepless nights while waiting for news of their grandchild's birth during the ongoing Yom Kippur War.
+Date: October 1973
+
+### EV002. Civilian Sacrifice & Support
+Unable to fight due to health, the father details personal financial contributions and describes widespread civilian mobilization supporting the war effort.
+Date: October 1973
+
+### EV003. Hope for Victory & Peace
+A strong desire for Israeli victory over Arab forces and an end to the conflict is voiced, invoking faith and leadership.
+Date: October 1973
+
+### EV004. The Dropped Iron
+Amidst the tension, the mother accidentally drops a hot iron, leading to a brief, humanizing moment of laughter and release.
+Date: October 1973
+
+### EV005. Passport Frustration
+The father expresses irritation over the mother's procrastination in obtaining a passport, delaying potential travel plans.
+Date: October 1973
+
+### EV006. Vow to Reunite
+The father passionately promises to overcome any obstacle, even borrowing money, to send the mother to visit her children and new grandchild.
+Date: October 1973
+
+### EV007. Tape Recorder Lifeline
+With mail disrupted by war, the audio tape becomes a vital yet difficult communication link, fraught with requests and delays.
+Date: October 1973
+
+### EV008. News from the Yom Kippur War
+A lengthy Hebrew radio news broadcast details military operations, casualties, international diplomacy, and the emerging oil crisis, embedding the family's story in history.
+Date: October 1973
+
+### EV009. Enduring Daily Hardships
+Life under war conditions is described through blackouts, sleeping fully clothed, repetitive meals, and the fear necessitating bunker visits.
+Date: October 1973
+
+### EV010. Mother's Emotional Toll
+Switching to Polish, the mother reveals her deep emotional strain, sleeplessness, numbness, and how this war feels different from past conflicts.
+Date: October 1973
+
+### EV011. A Call Brings Relief
+A phone call confirming a relative's safety provides a rare moment of emotional release for the otherwise stoic mother.
+Date: October 1973
+
+### EV012. Direct Plea for Connection
+The mother directly addresses her absent son, reassuring him they need no material aid but desperately crave news and connection.
+Date: October 1973
+
+### EV013. Return Address Sensitivity
+A specific, somewhat cryptic instruction is given regarding whose return address should (and should not) be used on letters sent back.
+Date: October 1973
+
+## EPISODES
+
+### Episode 1: Waiting in the Shadow
+Hook: Imagine waiting for the joyous news of your first grandchild, but the phone lines are silent, and the air outside hums with the tension of war. This is the reality facing one family in October 1973.
+
+Synopsis: This episode introduces the central family anxiously awaiting news of a birth amidst the backdrop of the Yom Kippur War. It establishes their deep worry, the sacrifices being made on the home front, and their fervent hopes for both family health and national victory.
+
+Event IDs: EV001, EV002, EV003
+
+### Episode 2: Between Laughter and Longing
+Hook: How do you maintain normalcy when war is raging? Sometimes, it's through a dropped iron, a nagging frustration, and a desperate promise.
+
+Synopsis: Focusing on the personal and domestic, this episode reveals the human side of the family's wartime experience. It covers moments of levity, familial tensions over future plans, the critical role of tape recordings for communication, and hints at underlying sensitivities.
+
+Event IDs: EV004, EV005, EV006, EV007, EV013
+
+### Episode 3: The World Outside
+Hook: The radio crackles to life, not with family news, but with the harsh realities of the conflict engulfing the nation. What does the war actually sound like on the airwaves?
+
+Synopsis: This episode immerses the listener in the broader context of the Yom Kippur War through an extended excerpt of a contemporary Israeli news broadcast. It details military actions, diplomatic efforts, and the global ramifications, grounding the personal narrative within the larger historical events.
+
+Event IDs: EV008
+
+### Episode 4: Voices in the Dark
+Hook: Darkness falls, both literally due to blackouts, and emotionally. We hear the mother's voice, raw and vulnerable, sharing the unique burdens she carries.
+
+Synopsis: Delving into the deeper emotional impact of the war, this episode highlights the daily hardships endured and focuses on the mother's powerful testimony. It explores her sleeplessness, her comparison to past wars, a brief moment of relief, and her ultimate plea for connection over material concerns.
+
+Event IDs: EV009, EV010, EV011, EV012
+
+## CONNECTIONS & CONTINUITY
+
+### Anxious Wait Amidst War causes Vow to Reunite
+The deep desire to see the new grandchild fuels the father's vow to reunite the family.
+
+### Anxious Wait Amidst War causes Tape Recorder Lifeline
+Anxiety over separation and lack of news makes the tape recorder a crucial communication tool.
+
+### Anxious Wait Amidst War causes Mother's Emotional Toll
+The combined stress of war and waiting for the birth significantly contributes to the mother's emotional strain.
+
+### Civilian Sacrifice & Support follows Hope for Victory & Peace
+Personal and collective sacrifices are undertaken in the hope of achieving victory and peace.
+
+### Civilian Sacrifice & Support parallels Enduring Daily Hardships
+Both financial sacrifice and enduring daily hardships illustrate the war's pervasive impact.
+
+### Hope for Victory & Peace parallels News from the Yom Kippur War
+The family's personal hope for victory is juxtaposed with the official news reports from the front lines.
+
+### The Dropped Iron contrasts Enduring Daily Hardships
+The brief, lighthearted anecdote of the dropped iron contrasts sharply with the pervasive daily fear and hardship.
+
+### Passport Frustration causes Vow to Reunite
+Frustration over the passport delay intensifies the father's determination to ensure the mother travels.
+
+### Tape Recorder Lifeline follows Direct Plea for Connection
+The reliance on tapes as the primary communication method leads to direct pleas for more news via this channel.
+
+### News from the Yom Kippur War causes Enduring Daily Hardships
+Reported military actions and threats directly lead to home-front hardships like blackouts and bunker visits.
+
+### News from the Yom Kippur War causes Mother's Emotional Toll
+Hearing the reality of the war via news broadcasts deepens the mother's anxiety and emotional burden.
+
+### Mother's Emotional Toll contrasts A Call Brings Relief
+The rare moment of relief from a phone call highlights the mother's usual state of emotional numbness.
+
+### A Call Brings Relief follows Direct Plea for Connection
+Experiencing relief from one piece of good news reinforces the desperate longing for regular connection.
+
+### Tape Recorder Lifeline follows Return Address Sensitivity
+Concerns about communication methods extend to specific instructions about return addresses on correspondence.
+
