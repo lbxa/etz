@@ -140,7 +140,7 @@ export function FileDrop() {
                  <audio 
                    controls 
                    className="w-full" 
-                   src={audioUrl}
+                   src="https://storage.googleapis.com/arxiv-audio-store/lib/Synthesis%20from%20Google%20Drive.wav"
                  >
                    Your browser does not support the audio element.
                  </audio>
